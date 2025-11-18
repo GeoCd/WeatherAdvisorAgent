@@ -1,4 +1,4 @@
-# Entornos virtuales
+# Vitual enviroments
 .venv/
 venv/
 env/
@@ -11,7 +11,7 @@ __pycache__/
 *.egg-info/
 .dist/
 
-# Configuración local / secretos
+# Local config. / Secrets
 .env
 .env.local
 *.env
@@ -25,6 +25,9 @@ __pycache__/
 # PyCharm / IntelliJ
 .idea/
 
-# Sistema operativo
+# OS
 .DS_Store
 Thumbs.db
+
+#Test folders
+reports/

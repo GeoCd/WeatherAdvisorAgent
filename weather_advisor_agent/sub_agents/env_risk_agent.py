@@ -27,7 +27,7 @@ env_risk_agent = Agent(
     output_key="env_risk_report",
     after_agent_callback=suppress_output_callback)
 
-loop_env_risk_agent = LoopAgent(
+robust_env_risk_agent = LoopAgent(
     name="robust_env_risk_agent",
     description="A robust risk analyst that retries if no valid risk report is produced.",
     sub_agents=[env_risk_agent,EnvRiskValidationChecker(name="env_risk_validation_checker")],

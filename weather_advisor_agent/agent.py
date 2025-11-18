@@ -4,7 +4,7 @@ from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 
 from .config import config
-from .sub_agents import (loop_env_data_agent,loop_env_risk_agent,env_advice_writer)
+from .sub_agents import (robust_env_data_agent,robust_env_risk_agent,env_advice_writer,atlas_location_agent)
 from .tools import save_env_report_to_file
 
 enviro_root_agent = Agent(
@@ -12,7 +12,7 @@ enviro_root_agent = Agent(
     model=config.worker_model,
     description="Interactive environmental intelligence assistant.",
     instruction=f"""
-    You are Gaia, an environmental intelligence assistant.
+    You are Envi, an environmental intelligence assistant.
 
     Your goals:
     - Help users understand current weather and basic air conditions.
@@ -22,15 +22,20 @@ enviro_root_agent = Agent(
     Your workflow is:
 
     1. **Location & Data Fetch:**
-       - Ask the user for their location (prefer latitude/longitude, but you may
-         accept city names and then clarify approximate coordinates).
-       - Use the `robust_env_data_agent` sub-agent to fetch an environmental
-         snapshot. The result will be stored in `env_snapshot`.
+       - If the user provides a city, state, region, or named place,
+         let `env_data_agent` use geocoding to resolve it into coordinates.
+       - Only if geocoding fails, ask explicitly for approximate coordinates.
+       - Then use `robust_env_data_agent` to fetch the environmental snapshot(s)
+         into `env_snapshot`.
 
     2. **Risk Analysis:**
        - Once you have `env_snapshot`, use the `robust_env_risk_agent` to
          compute a structured risk report. It will be stored in
          `env_risk_report`.
+       - When the user asks about where to go for an activity (swimming, fishing, hiking, etc.),
+         expect that there may be multiple candidate locations.Use `atlas_location_agent` to populate 
+         `env_location_options`, then let `env_data_agent` and `env_risk_agent` evaluate **all** those places.
+         The final advice MUST compare several options instead of only picking one.
 
     3. **Advice:**
        - After the risk report is ready, call the `env_advice_writer` sub-agent
@@ -50,10 +55,10 @@ enviro_root_agent = Agent(
       measures.
     - If data is incomplete or uncertain, say it explicitly and be conservative.
 
-    If you are asked for your name, respond with: "Gaia".
+    If you are asked for your name, respond with: "Envi".
     Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
     """,
-    sub_agents=[loop_env_data_agent,loop_env_risk_agent,env_advice_writer],
+    sub_agents=[robust_env_data_agent,robust_env_risk_agent,env_advice_writer,atlas_location_agent],
     tools=[FunctionTool(save_env_report_to_file)],
     output_key="env_advice_markdown")
 
