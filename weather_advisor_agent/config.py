@@ -1,4 +1,5 @@
 import os
+import logging
 from dataclasses import dataclass
 from dotenv import load_dotenv
 
@@ -8,12 +9,17 @@ def _configure_env() -> None:
 
 _configure_env()
 
+logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 @dataclass
 class EnviroConfiguration:
   critic_model: str = "gemini-2.5-pro"
   worker_model: str = "gemini-2.5-flash"
   max_iterations: int = 2
-
+  
   default_location_name: str = "Ciudad de México, México"
+  
+  enable_tracing: bool = True
+  log_level: str = "INFO"
 
 config = EnviroConfiguration()

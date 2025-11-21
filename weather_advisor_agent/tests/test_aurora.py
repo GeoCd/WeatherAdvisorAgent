@@ -1,16 +1,19 @@
 import asyncio
+
 from google.adk.runners import Runner
+
 from google.adk.sessions import InMemorySessionService
+
 from google.genai import types as genai_types
+
 from weather_advisor_agent.sub_agents import aurora_env_advice_writer
 
-APP_NAME = "enviro_app"
+APP_NAME = "envi_app"
 USER_ID = "test_user"
 SESSION_ID = "test_aurora"
 
 async def main():
   session_service = InMemorySessionService()
-
   initial_state = {
     "env_snapshot": [
       {
@@ -86,7 +89,7 @@ async def main():
     )
   ):
     if event.is_final_response() and event.content:
-      print("=== AURORA OUTPUT ===")
+      print("=== AURORA RESPONSE ===")
       for part in event.content.parts:
         if getattr(part, "text", None):
           print(part.text)

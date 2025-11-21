@@ -1,0 +1,236 @@
+{
+  "preferences": {
+    "demo_user_001": {
+      "user_id": "demo_user_001",
+      "preferred_activities": [
+        "hiking",
+        "swimming",
+        "cycling"
+      ],
+      "risk_tolerance": "low",
+      "favorite_locations": [
+        {
+          "name": "Sacramento, California",
+          "coordinates": {
+            "latitude": 38.58,
+            "longitude": -121.49
+          }
+        },
+        {
+          "name": "Lake Tahoe",
+          "coordinates": {
+            "latitude": 39.09,
+            "longitude": -120.03
+          }
+        }
+      ],
+      "preferred_weather": {
+        "min_temp_c": 15,
+        "max_wind_ms": 5,
+        "prefers_sunny": true
+      },
+      "last_updated": "2025-11-20T16:14:12.005779"
+    },
+    "user_test_01": {
+      "user_id": "user_test_01",
+      "preferred_activities": [
+        "swimming",
+        "hiking",
+        "cycling"
+      ],
+      "risk_tolerance": "low",
+      "favorite_locations": [
+        {
+          "name": "Sacramento, California",
+          "coordinates": {
+            "latitude": 38.58,
+            "longitude": -121.49
+          }
+        },
+        {
+          "name": "Lake Tahoe",
+          "coordinates": {
+            "latitude": 39.09,
+            "longitude": -120.03
+          }
+        }
+      ],
+      "preferred_weather": {
+        "min_temp_c": 15,
+        "max_wind_ms": 5,
+        "prefers_sunny": true
+      },
+      "last_updated": "2025-11-20T19:01:03.208733"
+    }
+  },
+  "history": {
+    "demo_user_001": [
+      {
+        "timestamp": "2025-11-20T16:14:12.009279",
+        "location": "Sacramento, California",
+        "activity": "hiking",
+        "conditions": {
+          "temp": 18,
+          "wind": 3
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T16:14:12.010901",
+        "location": "Lake Tahoe",
+        "activity": "swimming",
+        "conditions": {
+          "temp": 22,
+          "wind": 2
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T16:14:12.012861",
+        "location": "San Francisco",
+        "activity": "cycling",
+        "conditions": {
+          "temp": 16,
+          "wind": 8
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T16:14:12.015736",
+        "location": "Sacramento, California",
+        "activity": "hiking",
+        "conditions": {
+          "temp": 20,
+          "wind": 4
+        },
+        "user_feedback": null
+      }
+    ],
+    "user_test_01": [
+      {
+        "timestamp": "2025-11-20T18:59:29.343961",
+        "location": "Sacramento, California",
+        "activity": "hiking",
+        "conditions": {
+          "temp": 18,
+          "wind": 3
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T18:59:29.346735",
+        "location": "Lake Tahoe",
+        "activity": "swimming",
+        "conditions": {
+          "temp": 22,
+          "wind": 2
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T18:59:29.348624",
+        "location": "San Francisco",
+        "activity": "cycling",
+        "conditions": {
+          "temp": 16,
+          "wind": 8
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T18:59:29.351644",
+        "location": "Sacramento, California",
+        "activity": "hiking",
+        "conditions": {
+          "temp": 20,
+          "wind": 4
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T19:01:03.213720",
+        "location": "Sacramento, California",
+        "activity": "hiking",
+        "conditions": {
+          "temp": 18,
+          "wind": 3
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T19:01:03.218694",
+        "location": "Lake Tahoe",
+        "activity": "swimming",
+        "conditions": {
+          "temp": 22,
+          "wind": 2
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T19:01:03.221920",
+        "location": "San Francisco",
+        "activity": "cycling",
+        "conditions": {
+          "temp": 16,
+          "wind": 8
+        },
+        "user_feedback": null
+      },
+      {
+        "timestamp": "2025-11-20T19:01:03.223427",
+        "location": "Sacramento, California",
+        "activity": "hiking",
+        "conditions": {
+          "temp": 20,
+          "wind": 4
+        },
+        "user_feedback": null
+      }
+    ]
+  },
+  "locations": {
+    "Sacramento, California": {
+      "name": "Sacramento, California",
+      "coordinates": {
+        "latitude": 38.58,
+        "longitude": -121.49
+      },
+      "query_count": 6,
+      "last_queried": "2025-11-20T19:01:03.235769",
+      "typical_conditions": {
+        "temp": 19.0,
+        "wind": 3.5
+      },
+      "notes": "Queried by user multiple times"
+    },
+    "Lake Tahoe": {
+      "name": "Lake Tahoe",
+      "coordinates": {
+        "latitude": 39.09,
+        "longitude": -120.03
+      },
+      "query_count": 6,
+      "last_queried": "2025-11-20T19:01:03.240654",
+      "typical_conditions": {
+        "temp": 22.0,
+        "wind": 2.0
+      },
+      "notes": "Queried by user multiple times"
+    },
+    "San Francisco": {
+      "name": "San Francisco",
+      "coordinates": {
+        "latitude": 37.77,
+        "longitude": -122.41
+      },
+      "query_count": 6,
+      "last_queried": "2025-11-20T19:01:03.245639",
+      "typical_conditions": {
+        "temp": 16.0,
+        "wind": 7.0
+      },
+      "notes": "Queried by user multiple times"
+    }
+  }
+}

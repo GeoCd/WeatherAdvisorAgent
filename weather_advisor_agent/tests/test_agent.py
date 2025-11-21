@@ -1,55 +1,116 @@
 import asyncio
 import logging
+from pathlib import Path
+
 from google.adk.runners import Runner
+
 from google.adk.sessions import InMemorySessionService
+
 from google.genai import types as genai_types
-from weather_advisor_agent import root_agent
+
+from weather_advisor_agent import envi_root_agent
+from weather_advisor_agent.utils import observability
 
 APP_NAME = "envi_app"
 USER_ID = "test_user"
 SESSION_ID = "test_envi"
 
+def _looks_like_env_snapshot_json(text: str) -> bool:
+  if not text:
+    return False
+  
+  t = text.strip()
+
+  if not t.startswith("{"):
+    return False
+
+  suspicious_keys = ['"current"', '"hourly"', '"location"', '"raw"']
+  return any(k in t for k in suspicious_keys)
+
+
 async def main():
   session_service = InMemorySessionService()
-
   await session_service.create_session(
-    app_name=APP_NAME, 
-    user_id=USER_ID, 
+    app_name=APP_NAME,
+    user_id=USER_ID,
     session_id=SESSION_ID
   )
-
   runner = Runner(
-    agent=root_agent,
+    agent=envi_root_agent,
     app_name=APP_NAME,
     session_service=session_service
   )
 
-  queries = [
-    "I would like to know the current weather in my area.",
-    "Sure. I am currently in California US.",
-    "Generate a final recommendations report.",
-    "reports/today_envi_My_2_weather_recomendations.md"
-  ]
+  test = 1
+  
+  if test == 1:
+    queries = [
+      "I would like to know the current weather in my area.",
+      "Sure. I am currently around Sacramento, California. What's the weather like?",
+      "How is humidity today?",
+      "How's the temperature outside?"
+    ]
+  elif test == 2:
+    queries = [
+      "I would like to know the current weather in my area.",
+      "Sure. I am currently around Sacramento, California.",
+      "Generate a final recommendations report."
+    ]
+  elif test == 3:
+    queries = [
+      "I want to go hiking this weekend near Mexico City.",
+      "What are some good locations?",
+      "Generate a detailed report with recommendations."
+    ]
 
   logging.getLogger("google_genai.types").setLevel(logging.ERROR)
 
-  for query in queries:
-    print(f">>> {query}")
-    async for event in runner.run_async(
-      user_id=USER_ID,
-      session_id=SESSION_ID,
-      new_message=genai_types.Content(
-        role="user",
-        parts=[genai_types.Part.from_text(text = query)]
-      )
-    ):
-      if event.is_final_response() and event.content and event.content.parts:
-        print("=== FINAL RESPONSE ===")
-        for part in event.content.parts:
-          if getattr(part, "text", None):
-            print(part.text)
-          elif getattr(part, "function_call", None):
-            print("[function_call]", part.function_call)
+  for i, query in enumerate(queries, 1):
+    print(f">>> {query}\n")
+    last_user_facing_text = None
+
+    with observability.trace_operation(f"user_query_{i}",attributes={"query": query[:50]}):
+      async for event in runner.run_async(
+        user_id=USER_ID,
+        session_id=SESSION_ID,
+        new_message=genai_types.Content(
+          role="user",
+          parts=[genai_types.Part.from_text(text=query)]
+        )
+      ):
+        if not event.is_final_response():
+          continue
+        content = getattr(event, "content", None)
+        if not content:
+          continue
+        parts = getattr(content, "parts", None)
+        if not parts:
+          continue
+        for part in parts:
+          text = getattr(part, "text", None)
+          if not text:
+            continue
+          if _looks_like_env_snapshot_json(text):
+            continue
+
+          last_user_facing_text = text
+
+    print("=== ENVI RESPONSE ===")
+    if last_user_facing_text:
+      if len(last_user_facing_text) > 500:
+        print(last_user_facing_text[:500] + "\n... (truncated)")
+      else:
+        print(last_user_facing_text)
+    else:
+      print("[No user-facing text in response]")
+
+  print("METRICS & TRACES:")
+  observability.print_metrics_summary()
+
+  metrics_file = Path("weather_advisor_agent/data/observability_metrics_test.json")
+  observability.export_metrics(str(metrics_file))
+  traces_file = Path("weather_advisor_agent/data/observability_traces_test.json")
+  observability.export_traces(str(traces_file))
 
 if __name__ == "__main__":
     asyncio.run(main())

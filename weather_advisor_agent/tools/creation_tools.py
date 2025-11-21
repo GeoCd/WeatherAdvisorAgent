@@ -1,17 +1,15 @@
 import os
-from typing import Dict, Any
+from ..config import config 
 
-def save_env_report_to_file(report_markdown: str, filename: str) -> Dict[str, Any]:
-	print(f"[TOOL] save_env_report_to_file called with filename={filename}")
+def save_env_report_to_file(report_markdown: str, filename: str) -> str:
+  """Saves report to .md format"""
+  base_dir = getattr(config, "reports_dir", ".")
+  full_path = os.path.join(base_dir, filename)
 
-	folder = os.path.dirname(filename)
-	if folder and not os.path.exists(folder):
-		os.makedirs(folder, exist_ok=True)
+  os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-	full_path = os.path.abspath(filename)
-	with open(full_path, "w", encoding="utf-8") as f:
-		f.write(report_markdown)
+  with open(full_path, "w", encoding="utf-8") as f:
+    f.write(report_markdown)
 
-	print(f"[TOOL] Report saved to {full_path}")
-	return {"status": "success", "path": full_path}
+  return f"Report saved to: {full_path}"
 
