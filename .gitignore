@@ -29,5 +29,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-#Test folders
-diagnostics/
+#Diagnostic tests
+tests/test.test_evaluation.py
+tests/test.test_observability.py

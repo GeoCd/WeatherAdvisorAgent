@@ -1,6 +1,134 @@
 {
   "summary": {
-    "message": "No traces recorded"
+    "total_traces": 5,
+    "successful": 5,
+    "failed": 0,
+    "avg_duration_ms": 35925.74973106384,
+    "max_duration_ms": 117881.65020942688,
+    "min_duration_ms": 12378.217220306396,
+    "traces": [
+      {
+        "span_id": "user_query_1_1763876599910",
+        "name": "user_query_1",
+        "start_time": 1763876599.910198,
+        "end_time": 1763876615.035687,
+        "duration_ms": 15125.488996505737,
+        "status": "success",
+        "attributes": {
+          "query": "How is the weather in my city Sacramento, Californ"
+        },
+        "parent_span_id": null
+      },
+      {
+        "span_id": "user_query_2_1763876615037",
+        "name": "user_query_2",
+        "start_time": 1763876615.0371957,
+        "end_time": 1763876627.415413,
+        "duration_ms": 12378.217220306396,
+        "status": "success",
+        "attributes": {
+          "query": "I want to go hiking this weekend near Mexico City."
+        },
+        "parent_span_id": null
+      },
+      {
+        "span_id": "user_query_3_1763876627416",
+        "name": "user_query_3",
+        "start_time": 1763876627.416935,
+        "end_time": 1763876648.5861068,
+        "duration_ms": 21169.171810150146,
+        "status": "success",
+        "attributes": {
+          "query": "What is the weather like in those locations?"
+        },
+        "parent_span_id": null
+      },
+      {
+        "span_id": "user_query_4_1763876648593",
+        "name": "user_query_4",
+        "start_time": 1763876648.5930898,
+        "end_time": 1763876766.47474,
+        "duration_ms": 117881.65020942688,
+        "status": "success",
+        "attributes": {
+          "query": "Generate a recommendations report."
+        },
+        "parent_span_id": null
+      },
+      {
+        "span_id": "user_query_5_1763876766481",
+        "name": "user_query_5",
+        "start_time": 1763876766.4817202,
+        "end_time": 1763876779.5559406,
+        "duration_ms": 13074.220418930054,
+        "status": "success",
+        "attributes": {
+          "query": "Save it to reports/weather_advisor_agent/Envi_reco"
+        },
+        "parent_span_id": null
+      }
+    ]
   },
-  "all_traces": []
+  "all_traces": [
+    {
+      "span_id": "user_query_1_1763876599910",
+      "name": "user_query_1",
+      "start_time": 1763876599.910198,
+      "end_time": 1763876615.035687,
+      "duration_ms": 15125.488996505737,
+      "status": "success",
+      "attributes": {
+        "query": "How is the weather in my city Sacramento, Californ"
+      },
+      "parent_span_id": null
+    },
+    {
+      "span_id": "user_query_2_1763876615037",
+      "name": "user_query_2",
+      "start_time": 1763876615.0371957,
+      "end_time": 1763876627.415413,
+      "duration_ms": 12378.217220306396,
+      "status": "success",
+      "attributes": {
+        "query": "I want to go hiking this weekend near Mexico City."
+      },
+      "parent_span_id": null
+    },
+    {
+      "span_id": "user_query_3_1763876627416",
+      "name": "user_query_3",
+      "start_time": 1763876627.416935,
+      "end_time": 1763876648.5861068,
+      "duration_ms": 21169.171810150146,
+      "status": "success",
+      "attributes": {
+        "query": "What is the weather like in those locations?"
+      },
+      "parent_span_id": null
+    },
+    {
+      "span_id": "user_query_4_1763876648593",
+      "name": "user_query_4",
+      "start_time": 1763876648.5930898,
+      "end_time": 1763876766.47474,
+      "duration_ms": 117881.65020942688,
+      "status": "success",
+      "attributes": {
+        "query": "Generate a recommendations report."
+      },
+      "parent_span_id": null
+    },
+    {
+      "span_id": "user_query_5_1763876766481",
+      "name": "user_query_5",
+      "start_time": 1763876766.4817202,
+      "end_time": 1763876779.5559406,
+      "duration_ms": 13074.220418930054,
+      "status": "success",
+      "attributes": {
+        "query": "Save it to reports/weather_advisor_agent/Envi_reco"
+      },
+      "parent_span_id": null
+    }
+  ]
 }

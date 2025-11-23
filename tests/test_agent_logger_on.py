@@ -39,28 +39,13 @@ async def main():
     session_service=session_service
   )
 
-  test = 2
-  
-  if test == 1:
-    queries = [
-      "I would like to know the current weather in my area.",
-      "I am currently around Sacramento, California. What's the weather like?",
-      "How is humidity today?",
-      "How's the temperature outside?"
-    ]
-  elif test == 2:
-    queries = [
-      "I would like to know the current weather in my area.",
-      "I am currently around Sacramento, California.",
-      "Generate a recommendations report."
-    ]
-  elif test == 3:
-    queries = [
-      "I want to go hiking this weekend near Mexico City. What are some good locations?",
-      "What is the weather like in those locations?",
-      "Generate a recommendations report.",
-      "Save it to reports/Envi_recomendations.md"
-    ]
+  queries = [
+    "How is the weather in my city Sacramento, California?",
+    "I want to go hiking this weekend near Mexico City. What are some good locations?",
+    "What is the weather like in those locations?",
+    "Generate a recommendations report.",
+    "Save it to reports/weather_advisor_agent/Envi_recomendations.md"
+  ]
 
   logging.getLogger("google_genai.types").setLevel(logging.ERROR)
 

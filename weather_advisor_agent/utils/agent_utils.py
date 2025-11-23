@@ -122,10 +122,10 @@ def atlas_location_callback(callback_context: CallbackContext) -> Content:
   
   return Content()
 
+#Deprecated function, keeping for documentation and test porpuses
 def aurora_advice_callback(callback_context: CallbackContext) -> Content:
   """Callback for Aurora"""
   advice = callback_context.session.state.get("env_advice_markdown")
-  
   if advice and len(advice) > 100:
     observability.log_agent_complete("aurora_env_advice_writer","env_advice_markdown",success=True)
     logger.info(f"Generated advice report ({len(advice)} chars).\n")
@@ -133,7 +133,6 @@ def aurora_advice_callback(callback_context: CallbackContext) -> Content:
   else:
     observability.log_agent_complete("aurora_env_advice_writer","env_advice_markdown",success=False)
     logger.warning("Report too short or missing.\n")
-  
   return Content()
 
 def format_risk_summary(risk: any, snapshot: any) -> str:
