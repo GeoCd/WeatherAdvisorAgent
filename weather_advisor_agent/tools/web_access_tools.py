@@ -14,7 +14,7 @@ def fetch_env_snapshot_from_open_meteo(latitude: float,longitude: float) -> Dict
   observability.log_tool_call("fetch_env_snapshot_from_open_meteo", {"latitude": latitude,"longitude": longitude})
   
   if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
-    error = ValueError(f"Coordinates must be numeric: lat={latitude}, lon={longitude}")
+    error = ValueError(f"Coordinates must be Num: lat={latitude}, lon={longitude}")
     observability.log_error("fetch_env_snapshot_from_open_meteo", error)
     raise error
   
@@ -43,7 +43,7 @@ def fetch_env_snapshot_from_open_meteo(latitude: float,longitude: float) -> Dict
   }
   
   try:
-    logger.debug(f"Calling Open-Meteo API for ({latitude}, {longitude}) | ")
+    logger.debug(f"Calling Open-Meteo API.\n")
     resp = requests.get(base_url, params=params, timeout=10)
     resp.raise_for_status()
     data = resp.json()
@@ -256,9 +256,9 @@ def geocode_place_name(place_name: str, max_results: int = 3, region_hint: Optio
   if last_error is not None:
     out["error"] = last_error.get("error")
     out["error_message"] = last_error.get("message")
-    logger.warning(f"All attempts failed.")
+    logger.warning(f"All attempts failed.\n")
   else:
-    logger.warning(f"No geocoding results found.")
+    logger.warning(f"No geocoding results found.\n")
   
   observability.log_tool_complete("geocode_place_name", success=False, duration_ms=duration_ms)
   

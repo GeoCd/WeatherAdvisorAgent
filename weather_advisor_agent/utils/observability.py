@@ -1,16 +1,18 @@
 import logging
 import time
 import json
-from typing import Dict, Any, Optional, List
 from datetime import datetime
-from dataclasses import dataclass, field
+from typing import Dict, Any, Optional, List
+
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 
 logging.basicConfig(
   level=logging.INFO,
   format='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
   datefmt='%Y-%m-%d %H:%M:%S'
 )
+
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -88,23 +90,11 @@ class EnviMetrics:
   def get_summary(self) -> Dict[str, Any]:
     runtime = (datetime.now() - self.start_time).total_seconds()
 
-    avg_agent_durations = {
-      name: sum(durations) / len(durations)
-      for name, durations in self.agent_durations.items()
-      if durations
-    }
-    
-    avg_tool_durations = {
-      name: sum(durations) / len(durations)
-      for name, durations in self.tool_durations.items()
-      if durations
-    }
-    
+    avg_agent_durations = {name: sum(durations) / len(durations) for name, durations in self.agent_durations.items()if durations}
+    avg_tool_durations = {name: sum(durations) / len(durations) for name, durations in self.tool_durations.items()if durations}
     total_operations = self.successful_operations + self.failed_operations
-    success_rate = (
-      (self.successful_operations / total_operations * 100)
-      if total_operations > 0 else 0
-    )
+    
+    success_rate = ((self.successful_operations / total_operations * 100) if total_operations > 0 else 0)
     
     return {
         "runtime_seconds": round(runtime, 2),
@@ -158,7 +148,7 @@ class EnviObservability:
     def log_agent_start(self, agent_name: str, context: Optional[Dict[str, Any]] = None):
       self.metrics.increment_agent_calls(agent_name)
       context_str = f"Context: {context}" if context else ""
-      self.logger.info(f"[--AGENT--] {agent_name}{context_str} |\n")
+      self.logger.info(f"[--AGENT--] {agent_name} {context_str} |\n")
     
     def log_agent_complete(self,agent_name: str,output_key: str,success: bool = True,duration_ms: Optional[float] = None):
       if success:
@@ -199,7 +189,7 @@ class EnviObservability:
       else:
         status = "NOT PASSED"
 
-      self.logger.info(f"[--VALIDATION--] {checker_name} | {status}|\n")
+      self.logger.info(f"[--VALIDATION--] {checker_name} | {status} |\n")
   
     def log_error(self, context: str, error: Exception, details: Optional[str] = None):
       error_type = type(error).__name__
@@ -208,7 +198,7 @@ class EnviObservability:
     
     def log_state_change(self, key: str, action: str, value_preview: str = ""):
       preview = f"Value: {value_preview[:50]}" if value_preview else ""
-      self.logger.debug(f"[--STATE--] {action} key '{key}'{preview} |\n")
+      self.logger.debug(f"[--STATE--] {action} key '{key}' {preview} |\n")
     
 
     @contextmanager
@@ -218,7 +208,6 @@ class EnviObservability:
         return
       
       span = TraceSpan(name=operation_name,start_time=time.time(),parent_span_id=parent_span_id,attributes=attributes or {})
-      
       self.active_spans[span.span_id] = span
       self.logger.debug(f"[--TRACE--] {operation_name} | span_id: {span.span_id} |\n")
       
@@ -279,7 +268,7 @@ class EnviObservability:
       """Export metrics to JSON file"""
       import json
       with open(filepath, 'w') as f:
-          json.dump(self.metrics.get_summary(), f, indent=2)
+        json.dump(self.metrics.get_summary(), f, indent=2)
         
 
 observability = EnviObservability(enable_traces=True)
@@ -293,14 +282,13 @@ def trace_function(operation_name: Optional[str] = None):
     return wrapper
   return decorator
 
-
 def log_exceptions(context: str):
   def decorator(func):
     def wrapper(*args, **kwargs):
       try:
         return func(*args, **kwargs)
       except Exception as e:
-        observability.log_error(context, e, details=f"Function: {func.__name__}")
+        observability.log_error(context, e, details=f"Function: {func.__name__} | \n")
         raise
     return wrapper
   return decorator

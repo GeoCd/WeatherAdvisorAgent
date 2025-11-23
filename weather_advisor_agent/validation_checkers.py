@@ -2,7 +2,7 @@ import json
 import logging
 from typing import AsyncGenerator
 
-from google.genai.types import Content
+from google.genai.types import Content,Part
 from google.adk.agents import BaseAgent, Agent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.agents.callback_context import CallbackContext
@@ -106,7 +106,8 @@ class EnvRiskValidationChecker(BaseAgent):
     observability.log_validation("EnvRiskValidationChecker",passed=is_valid,details=validation_details)
     observability.log_agent_complete("EnvRiskValidationChecker","env_risk_report",success=is_valid)
     
-    yield Event(author=self.name,actions=EventActions(escalate=is_valid))
+    yield Event(author=self.name, actions=EventActions())
+
 
 
 class EnvLocationGeoValidationChecker(BaseAgent):
@@ -191,41 +192,39 @@ class EnvLocationGeoValidationChecker(BaseAgent):
 
     yield Event(author=self.name, actions=EventActions(escalate=passed))
 
-class ForceAuroraChecker(Agent):
-    """
-    Validation checker that forces Aurora to run if env_advice_markdown is missing.
-    This ensures Aurora is ALWAYS called after risk assessment.
-    """
+class EnvForceAuroraChecker(Agent):
+  def __init__(self, **args):
+    if "name" in args:
+        args.pop("name")
+
+    super().__init__(
+      name="force_aurora_checker",
+      model="gemini-2.0-flash-lite",
+      description="Enforces Aurora execution - blocks until Aurora runs",
+      instruction="""
+      You are a validation checker that ENFORCES Aurora execution.
+      Check the session state:
+      - If env_risk_report exists but env_advice_markdown is missing or empty:
+          Return AURORA_REQUIRED
+      - If advice markdown exists:
+          Return PASS
+      """,
+      after_agent_callback=self.enforce_aurora_callback,
+      output_key="env_advice_check",**args
+    )
+
+  @staticmethod
+  def enforce_aurora_callback(callback_context: CallbackContext) -> Content:
+    state = callback_context.session.state
     
-    def __init__(self, name: str = "force_aurora_checker"):
-        super().__init__(
-            name=name,
-            model="gemini-2.0-flash-exp",  # Lightweight model
-            description="Ensures Aurora is called after risk assessment",
-            instruction="""
-            You are a validation checker that ensures the pipeline is complete.
-            
-            Check the session state:
-            - If env_risk_report exists BUT env_advice_markdown is missing:
-              Return "FORCE_AURORA" to trigger Aurora
-            - Otherwise return "PASS"
-            
-            Be very brief. Just return one word: "FORCE_AURORA" or "PASS".
-            """,
-            after_agent_callback=self.force_aurora_callback
-        )
-    
-    @staticmethod
-    def force_aurora_callback(callback_context: CallbackContext) -> Content:
-        """Check if Aurora needs to be forced"""
-        state = callback_context.session.state
-        
-        has_risk = state.get("env_risk_report") is not None
-        has_advice = state.get("env_advice_markdown") is not None
-        
-        if has_risk and not has_advice:
-            # Force Aurora to run
-            callback_context.session.state["_force_aurora"] = True
-            print("⚠️  FORCING AURORA: Risk report exists but no advice markdown")
-        
-        return Content()
+    has_risk = state.get("env_risk_report") is not None
+    advice = state.get("env_advice_markdown")
+    has_advice = advice is not None and len(str(advice)) > 50
+
+    if has_risk and not has_advice:
+      logger.warning("FORCING AURORA RESPONSE:\n")
+      state["_aurora_required"] = True
+      return Content(parts=[Part(text="AURORA_REQUIRED")])
+
+    state["_aurora_required"] = False
+    return Content(parts=[Part(text="PASS")])

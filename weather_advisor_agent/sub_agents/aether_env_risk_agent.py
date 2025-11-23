@@ -2,11 +2,12 @@ from weather_advisor_agent.config import config
 
 from google.adk.agents import Agent, LoopAgent
 
-from weather_advisor_agent.utils import aether_risk_callback
+from weather_advisor_agent.validation_checkers import EnvRiskValidationChecker,EnvForceAuroraChecker
 
-from weather_advisor_agent.validation_checkers import EnvRiskValidationChecker
+from weather_advisor_agent.sub_agents.aurora_env_advice_writer import make_aurora_writer
 
-from weather_advisor_agent.utils import observability
+from weather_advisor_agent.utils import aether_risk_callback, observability
+
 
 aether_env_risk_agent = Agent(
   model=config.critic_model,
@@ -64,7 +65,7 @@ aether_env_risk_agent = Agent(
 robust_env_risk_agent = LoopAgent(
   name="robust_env_risk_agent",
   description="A robust risk analyst that retries if no valid risk report is produced.",
-  sub_agents=[aether_env_risk_agent,EnvRiskValidationChecker(name="env_risk_validation_checker")],
-  max_iterations=config.max_iterations
+  sub_agents=[aether_env_risk_agent,make_aurora_writer(name="aurora_writer_for_risk_pipeline"),EnvRiskValidationChecker(name="env_risk_validation_checker"),  EnvForceAuroraChecker()],
+  max_iterations=2
 )
 

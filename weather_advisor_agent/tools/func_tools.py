@@ -3,10 +3,8 @@ from typing import Dict, Any
 
 from .web_access_tools import fetch_env_snapshot_from_open_meteo
 
-
 logger = logging.getLogger(__name__)
 _last_snapshot = None
-
 
 def fetch_and_store_snapshot(latitude: float, longitude: float) -> Dict[str, Any]:
   """Wrapper for fetch_env_snapshot_from_open_meteo"""

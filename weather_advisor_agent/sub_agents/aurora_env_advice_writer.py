@@ -6,9 +6,10 @@ from weather_advisor_agent.utils import aurora_advice_callback
 
 from weather_advisor_agent.utils import observability
 
-aurora_env_advice_writer = Agent(
-  model=config.worker_model,
-  name="aurora_env_advice_writer",
+def make_aurora_writer(name="aurora_env_advice_writer"):
+  return Agent(
+  model=config.writer_model,
+  name=name,
   description="Writes user-facing environmental advice based on data and risk report.",
   instruction="""
   CRITICAL ROLE BOUNDARY
@@ -188,23 +189,23 @@ aurora_env_advice_writer = Agent(
   1. **Match the query complexity**: Simple question = simple answer. Complex request = detailed report.
 
   2. **Use available data**: Work with whatever state keys are present. If only weather data exists, 
-     focus on weather. If risk data exists, incorporate it.
+    focus on weather. If risk data exists, incorporate it.
 
   3. **Be conversational for simple queries**: "The weather in Tlalpan Forest is currently 15°C with 
-     moderate wind..." is better than a formal report structure for simple questions.
+    moderate wind..." is better than a formal report structure for simple questions.
 
   4. **Always provide value**: Even if data is limited, give the user something useful.
 
   5. **No placeholders in output**: Replace ALL placeholders like DATE_HERE, BEST_LOCATION_NAME, etc. 
-     with actual values. If you don't have the data, omit that section or say "not available."
+    with actual values. If you don't have the data, omit that section or say "not available."
 
   6. **No code blocks**: NEVER wrap your entire response in ``` markdown blocks. The output IS markdown,
-     not a code block containing markdown.
+    not a code block containing markdown.
 
   7. **Language**: Respond in the user's language (Spanish if they write in Spanish, etc.)
 
   8. **Uncertainty**: If data is missing or unreliable, acknowledge it briefly but still provide 
-     what you can.
+    what you can.
 
   ===================================
   EXAMPLES
@@ -272,6 +273,5 @@ aurora_env_advice_writer = Agent(
   - Never output raw JSON or state variables
   - Never wrap output in code blocks (```)
   """,
-  output_key="env_advice_markdown",
-  after_agent_callback=aurora_advice_callback
+  output_key="env_advice_markdown"
 )

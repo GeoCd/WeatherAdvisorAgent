@@ -151,7 +151,6 @@ async def debug_query(runner, session_service, query):
 async def main():
     session_service = InMemorySessionService()
     
-    # Minimal initial state for testing
     initial_state = {
         "env_snapshot": [
             {

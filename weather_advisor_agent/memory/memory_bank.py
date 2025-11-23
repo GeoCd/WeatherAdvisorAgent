@@ -117,7 +117,7 @@ class EnviMemoryBank:
     
     self.query_history[user_id] = self.query_history[user_id][-100:]
     
-    logger.info(f"Added query to history({user_id}: {location}).")
+    logger.info(f"Added query to history({user_id}: {location}).\n")
     
     if self.storage_path:
       self._save_to_disk()
@@ -125,7 +125,7 @@ class EnviMemoryBank:
   def get_query_history(self,user_id: str,limit: Optional[int] = None) -> List[QueryHistory]:
     """Get query history"""
     history = self.query_history.get(user_id, [])
-    history_reversed = list(reversed(history))  # Most recent first
+    history_reversed = list(reversed(history))
     
     if limit:
       return history_reversed[:limit]
@@ -173,7 +173,7 @@ class EnviMemoryBank:
     if notes:
         memo.notes = notes
     
-    logger.info(f"Updated memory for {name}.")
+    logger.info(f"Updated memory for {name}.\n")
     
     if self.storage_path:
       self._save_to_disk()
@@ -195,37 +195,30 @@ class EnviMemoryBank:
     
     activity_counts = {}
     for query in history:
-        if query.activity:
-            activity_counts[query.activity] = activity_counts.get(query.activity, 0) + 1
-    
+      if query.activity:
+        activity_counts[query.activity] = activity_counts.get(query.activity, 0) + 1
+  
     return {
-        "user_id": user_id,
-        "has_preferences": pref is not None,
-        "preferred_activities": pref.preferred_activities if pref else [],
-        "risk_tolerance": pref.risk_tolerance if pref else "unknown",
-        "total_queries": len(history),
-        "recent_locations": recent_locations,
-        "activity_pattern": activity_counts,
-        "favorite_locations_count": len(pref.favorite_locations) if pref else 0
+      "user_id": user_id,
+      "has_preferences": pref is not None,
+      "preferred_activities": pref.preferred_activities if pref else [],
+      "risk_tolerance": pref.risk_tolerance if pref else "unknown",
+      "total_queries": len(history),
+      "recent_locations": recent_locations,
+      "activity_pattern": activity_counts,
+      "favorite_locations_count": len(pref.favorite_locations) if pref else 0
     }
   
   def _save_to_disk(self):
     """Save to JSON file."""
     if not self.storage_path:
-        return
+      return
     
     try:
       data = {
-        "preferences": {
-          k: asdict(v) for k, v in self.user_preferences.items()
-        },
-        "history": {
-          k: [asdict(q) for q in v] 
-          for k, v in self.query_history.items()
-        },
-        "locations": {
-          k: asdict(v) for k, v in self.location_memories.items()
-        }
+        "preferences": {k: asdict(v) for k, v in self.user_preferences.items()},
+        "history": {k: [asdict(q) for q in v] for k, v in self.query_history.items()},
+        "locations": {k: asdict(v) for k, v in self.location_memories.items()}
       }
       
       Path(self.storage_path).parent.mkdir(parents=True, exist_ok=True)
@@ -233,10 +226,10 @@ class EnviMemoryBank:
       with open(self.storage_path, 'w') as f:
         json.dump(data, f, indent=2)
       
-      logger.debug(f"Saved memory bank to {self.storage_path}.")
+      logger.debug(f"Saved memory bank to {self.storage_path}.\n")
     
     except Exception as e:
-      logger.error(f"Failed to save memory bank: {e}.")
+      logger.error(f"Failed to save memory bank: {e}.\n")
   
   def _load_from_disk(self):
     """Load from JSON file"""
@@ -259,7 +252,7 @@ class EnviMemoryBank:
       logger.info(f"Loaded memory bank from {self.storage_path}.")
   
     except Exception as e:
-      logger.error(f"Failed to load memory bank: {e}.")
+      logger.error(f"Failed to load memory bank: {e}.\n")
   
   def export_summary(self) -> Dict[str, Any]:
     """Export summary statistics"""

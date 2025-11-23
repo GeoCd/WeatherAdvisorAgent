@@ -3,9 +3,7 @@ import logging
 from pathlib import Path
 
 from google.adk.runners import Runner
-
 from google.adk.sessions import InMemorySessionService
-
 from google.genai import types as genai_types
 
 from weather_advisor_agent import envi_root_agent
@@ -41,7 +39,7 @@ async def main():
     session_service=session_service
   )
 
-  test = 3
+  test = 2
   
   if test == 1:
     queries = [
@@ -54,8 +52,7 @@ async def main():
     queries = [
       "I would like to know the current weather in my area.",
       "I am currently around Sacramento, California.",
-      "Generate a recommendations report.",
-      "Save it to reports/Envi_recomendations.md"
+      "Generate a recommendations report."
     ]
   elif test == 3:
     queries = [
@@ -97,9 +94,6 @@ async def main():
 
     print("=== ENVI RESPONSE ===")
     if last_user_facing_text:
-      if len(last_user_facing_text) > 1000:
-        print(f"{last_user_facing_text[:1000]} \n... (truncated)\n")
-      else:
         print(f"{last_user_facing_text}\n")
     else:
       print("[No user-facing text in response]\n")

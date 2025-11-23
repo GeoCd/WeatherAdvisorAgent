@@ -14,12 +14,10 @@ def _parse_json_string(value: str) -> any:
   if not isinstance(value, str):
     return value
   
-  # Remove markdown code blocks
   value = re.sub(r'```json\s*', '', value)
   value = re.sub(r'```\s*', '', value)
   value = value.strip()
   
-  # Try to parse as JSON
   try:
     parsed = json.loads(value)
     return parsed
@@ -88,7 +86,6 @@ def aether_risk_callback(callback_context: CallbackContext) -> Content:
   
   return Content()
 
-
 def atlas_location_callback(callback_context: CallbackContext) -> Content:
   """Callback for Atlas - with improved JSON parsing"""
   locations = callback_context.session.state.get("env_location_options")
@@ -125,7 +122,6 @@ def atlas_location_callback(callback_context: CallbackContext) -> Content:
   
   return Content()
 
-
 def aurora_advice_callback(callback_context: CallbackContext) -> Content:
   """Callback for Aurora"""
   advice = callback_context.session.state.get("env_advice_markdown")
@@ -140,156 +136,134 @@ def aurora_advice_callback(callback_context: CallbackContext) -> Content:
   
   return Content()
 
-def format_risk_summary(risk: dict, snapshot: any) -> str:
-    """Convert risk report + snapshot into natural language"""
+def format_risk_summary(risk: any, snapshot: any) -> str:
+  """Convert risk report"""
+  if isinstance(risk, str):
+    risk = _parse_json_string(risk)
+
+  if not isinstance(risk, dict):
+    return "Invalid data type"
+  
+  overall = risk.get("overall_risk", "unknown")
+  rationale = risk.get("rationale", "")
+  
+  lines = ["## Weather & Safety Assessment\n"]
+  lines.append(f"**Overall Risk Level:** {overall.upper()}\n")
+
+  risk_factors = []
+  risk_labels = {"heat_risk": "Heat Risk","cold_risk": "Cold Risk", "wind_risk": "Wind Risk","air_quality_risk": "Air Quality Risk"}
+  
+  for risk_type, label in risk_labels.items():
+    level = risk.get(risk_type, "unknown")
+    if level not in ["low", "unknown"]:
+      risk_factors.append(f"**{label}:** {level.capitalize()}")
+  
+  if risk_factors:
+    lines.append("\n**Risk Factors:**")
+    lines.extend(risk_factors)
+  
+  if rationale:
+    lines.append(f"\n**Analysis:** {rationale}")
+  
+  if snapshot:
+    if isinstance(snapshot, dict) and "location_name" in snapshot:
+      name = snapshot.get("location_name", "your location")
+      current = snapshot.get("current", {})
+      temp = current.get("temperature_c")
+      feels = current.get("feels_like_c", temp)
+      wind_ms = current.get("wind_speed_10m_ms")
+      humidity = current.get("humidity_percent")
+      
+      lines.append("\n**Current Weather:**")
+      if name:
+        lines.append(f"- **Location:** {name}")
+      if temp is not None:
+        if feels is not None and feels != temp:
+          lines.append(f"- **Temperature:** {temp}°C (feels like {feels}°C)")
+        else:
+          lines.append(f"- **Temperature:** {temp}°C")
+      if wind_ms is not None:
+        lines.append(f"- **Wind:** {wind_ms} m/s")
+      if humidity is not None:
+        lines.append(f"- **Humidity:** {humidity}%")
     
-    overall = risk.get("overall_risk", "unknown")
-    rationale = risk.get("rationale", "")
-    
-    lines = ["## Weather & Safety Assessment\n"]
-    lines.append(f"**Overall Risk Level:** {overall.upper()}\n")
-    
-    # Risk factors - show warnings for non-low risks
-    risk_factors = []
-    risk_labels = {
-        "heat_risk": "Heat Risk",
-        "cold_risk": "Cold Risk", 
-        "wind_risk": "Wind Risk",
-        "air_quality_risk": "Air Quality Risk"
-    }
-    
-    for risk_type, label in risk_labels.items():
-        level = risk.get(risk_type, "unknown")
-        if level not in ["low", "unknown"]:
-            risk_factors.append(f"- ⚠️ **{label}:** {level.capitalize()}")
-    
-    if risk_factors:
-        lines.append("\n**Risk Factors:**")
-        lines.extend(risk_factors)
-    
-    # Rationale
-    if rationale:
-        lines.append(f"\n**Analysis:** {rationale}")
-    
-    # Weather data - handle BOTH single dict and list
-    if snapshot:
-        if isinstance(snapshot, dict) and "location_name" in snapshot:
-            # Single location snapshot
-            name = snapshot.get("location_name", "your location")
-            current = snapshot.get("current", {})
-            temp = current.get("temperature_c")
-            feels = current.get("feels_like_c", temp)
-            wind_ms = current.get("wind_speed_10m_ms")
-            humidity = current.get("humidity_percent")
-            
-            lines.append("\n**Current Weather:**")
-            if name:
-                lines.append(f"- **Location:** {name}")
-            if temp is not None:
-                if feels is not None and feels != temp:
-                    lines.append(f"- **Temperature:** {temp}°C (feels like {feels}°C)")
-                else:
-                    lines.append(f"- **Temperature:** {temp}°C")
-            if wind_ms is not None:
-                lines.append(f"- **Wind:** {wind_ms} m/s")
-            if humidity is not None:
-                lines.append(f"- **Humidity:** {humidity}%")
+    elif isinstance(snapshot, list) and snapshot:
+      lines.append("\n**Weather by Location:**\n")
+      for loc in snapshot:
+        if not isinstance(loc, dict):
+            continue       
+        name = loc.get("location_name", "Unknown")
+        current = loc.get("current", {})
+        temp = current.get("temperature_c", "?")
+        wind = current.get("wind_speed_10m_ms", "?")
+        humidity = current.get("humidity_percent", "?")
         
-        elif isinstance(snapshot, list) and snapshot:
-            # Multiple locations
-            lines.append("\n**Weather by Location:**\n")
-            for loc in snapshot:
-                if not isinstance(loc, dict):
-                    continue
-                    
-                name = loc.get("location_name", "Unknown")
-                current = loc.get("current", {})
-                temp = current.get("temperature_c", "?")
-                wind = current.get("wind_speed_10m_ms", "?")
-                humidity = current.get("humidity_percent", "?")
-                
-                lines.append(f"**{name}**")
-                lines.append(f"  - Temperature: {temp}°C, Wind: {wind} m/s, Humidity: {humidity}%")
-    
-    return "\n".join(lines)
+        lines.append(f"**{name}**")
+        lines.append(f"  - Temperature: {temp}°C, Wind: {wind} m/s, Humidity: {humidity}%")
+
+  return "\n".join(lines)
 
 
 def format_weather_summary(snapshot: any) -> str:
-    """Convert weather snapshot into natural language"""
+  """Convert weather snapshot"""
+  
+  if isinstance(snapshot, str):
+    snapshot = _parse_json_string(snapshot)
+  
+  if isinstance(snapshot, dict):
+    name = snapshot.get("location_name", "your location")
+    current = snapshot.get("current", {})
+    temp = current.get("temperature_c", "?")
+    feels = current.get("feels_like_c", temp)
+    wind = current.get("wind_speed_10m_ms", "?")
+    humidity = current.get("humidity_percent", "?")
     
-    if isinstance(snapshot, list):
-        lines = ["Current weather across your locations:\n"]
-        for loc in snapshot:
-            name = loc.get("location_name", "Unknown")
-            current = loc.get("current", {})
-            temp = current.get("temperature_c", "?")
-            wind = current.get("wind_speed_10m_ms", "?")
-            humidity = current.get("humidity_percent", "?")
-            
-            lines.append(f"**{name}**")
-            lines.append(f"- Temperature: {temp}°C, Wind: {wind} m/s, Humidity: {humidity}%\n")
-        
-        return "\n".join(lines)
+    return (
+      f"Current weather at {name}:"
+      f" -Temperature: {temp}°C (feels like {feels}°C)"
+      f" -Wind: {wind} m/s"
+      f" -Humidity: {humidity}%"
+    )
+
+  elif isinstance(snapshot, list):
+    lines = ["Current weather across your locations:\n"]
+    for loc in snapshot:
+      if not isinstance(loc, dict):
+        continue
+          
+      name = loc.get("location_name", "Unknown")
+      current = loc.get("current", {})
+      temp = current.get("temperature_c", "?")
+      wind = current.get("wind_speed_10m_ms", "?")
+      humidity = current.get("humidity_percent", "?")
+      
+      lines.append(f"--{name}--")
+      lines.append(f"| Temperature: {temp}°C | Wind: {wind} m/s | Humidity: {humidity}%\n")
     
-    return "Weather data not available."
+    return "\n".join(lines)
+  return "Null data.\n"
 
 def envi_root_callback(*args, **kwargs):
-    """Ultra-aggressive callback that NEVER allows JSON through"""
-    
+
     ctx = kwargs.get("callback_context")
     if ctx is None and len(args) >= 2:
         ctx = args[1]
     if ctx is None:
         return None
-
     state = ctx.session.state
 
-    # Check if Aurora is required but hasn't been called
-    aurora_required = state.get("_aurora_required", False)
-    if aurora_required:
-        logger.error("❌ CRITICAL: Aurora was required but not called!")
-        logger.error("❌ This should never happen - pipeline validation failed")
-        # Force format the output anyway
-        risk = state.get("env_risk_report")
-        snapshot = state.get("env_snapshot")
-        if risk and snapshot:
-            return Content(parts=[Part(text=format_risk_summary(risk, snapshot))])
-
-    # === PRIORITY 1: FULL REPORT ===
     advice = state.get("env_advice_markdown")
-    if advice and len(str(advice)) > 50:  # Must be substantial
-        # Strip code blocks
-        advice = str(advice).strip()
-        if advice.startswith("```markdown"):
-            advice = advice.replace("```markdown", "").replace("```", "").strip()
-        elif advice.startswith("```"):
-            advice = advice.replace("```", "").strip()
-        
+    if advice:
         return Content(parts=[Part(text=advice)])
 
-    # === PRIORITY 2: RISK REPORT (SHOULD NOT REACH HERE IF PIPELINE WORKS) ===
-    risk = state.get("env_risk_report")
-    snapshot = state.get("env_snapshot")
-    
-    if risk and isinstance(risk, dict):
-        logger.warning("⚠️  Callback received risk report without advice markdown")
-        logger.warning("⚠️  Formatting risk report as fallback")
-        return Content(parts=[Part(text=format_risk_summary(risk, snapshot))])
+    last_msg = state.get("last_user_message", "").lower()
+    if "weather" in last_msg and (state.get("env_snapshot") or state.get("env_risk_report")):
+      return None
 
-    # === PRIORITY 3: WEATHER SNAPSHOT ===
-    if snapshot:
-        logger.warning("⚠️  Callback received snapshot without advice markdown")
-        return Content(parts=[Part(text=format_weather_summary(snapshot))])
-
-    # === PRIORITY 4: LOCATION LIST ===
     locs = state.get("env_location_options")
-    if isinstance(locs, list) and locs:
-        if len(locs) > 0 and isinstance(locs[0], dict):
-            lines = [
-                f"- {loc.get('name','Unknown')} — {loc.get('admin1','')}, {loc.get('country','')}"
-                for loc in locs
-            ]
-            msg = "Here are some options you might consider:\n" + "\n".join(lines)
-            return Content(parts=[Part(text=msg)])
+    if isinstance(locs, list) and locs and isinstance(locs[0], dict):
+        lines = [f"- {loc.get('name','Unknown')} — {loc.get('admin1','')}, {loc.get('country','')}" for loc in locs]
+        msg = "Here are some options you might consider:\n" + "\n".join(lines)
+        return Content(parts=[Part(text=msg)])
 
     return None

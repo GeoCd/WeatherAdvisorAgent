@@ -1,11 +1,11 @@
-from ..config import config
-
 import logging
 
+from weather_advisor_agent.config import config
+
 from google.genai.types import Content
-from google.adk.agents.callback_context import CallbackContext
-from google.adk.agents import Agent, LoopAgent
 from google.adk.tools import FunctionTool
+from google.adk.agents import Agent, LoopAgent
+from google.adk.agents.callback_context import CallbackContext
 
 from weather_advisor_agent.tools import (geocode_place_name,fetch_and_store_snapshot,get_last_snapshot)
 
@@ -53,5 +53,5 @@ robust_env_data_agent = LoopAgent(
   name="robust_env_data_agent",
   description="Robust environmental data fetcher with retries.",
   sub_agents=[zephyr_env_data_agent,EnvSnapshotValidationChecker(name="env_snapshot_validation_checker")],
-  max_iterations=config.max_iterations
+  max_iterations=2
 )
