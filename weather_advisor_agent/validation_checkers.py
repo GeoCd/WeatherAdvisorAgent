@@ -1,5 +1,6 @@
 import json
 import logging
+
 from typing import AsyncGenerator
 
 from google.genai.types import Content,Part
@@ -8,92 +9,94 @@ from google.adk.agents.invocation_context import InvocationContext
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.events import Event, EventActions
 
-from weather_advisor_agent.utils import observability
+from weather_advisor_agent.utils import Theophrastus_Observability
+
 
 logger = logging.getLogger(__name__)
 
-
 class EnvSnapshotValidationChecker(BaseAgent):
+  """Validates environmental snapshot data stored in session state."""
   async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
-    observability.log_agent_start("EnvSnapshotValidationChecker", {"session_id": context.session.id})
+    Theophrastus_Observability.log_agent_start("EnvSnapshotValidationChecker", {"session_id": context.session.id})
     snapshot = context.session.state.get("env_snapshot")
     
-    # CRITICAL FIX: Parse JSON string if needed
     if isinstance(snapshot, str):
-        try:
-            snapshot = json.loads(snapshot)
-            logger.debug("Parsed env_snapshot from JSON string")
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse env_snapshot JSON: {e}")
-            snapshot = None
+      try:
+        snapshot = json.loads(snapshot)
+        logger.debug("Parsed env_snapshot from JSON string")
+      except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse env_snapshot JSON: {e}")
+        snapshot = None
     
     def is_valid_snapshot(snap: dict) -> bool:
-        if not isinstance(snap, dict):
-            return False
-        
-        current = snap.get("current") or {}
-        if not isinstance(current, dict):
-            return False
-        
-        temp = current.get("temperature_c")
-        feels_like = current.get("apparent_temperature_c")
-        wind = current.get("wind_speed_10m_ms")
-        humidity = current.get("relative_humidity_percent")
-        
-        has_data = any(v is not None for v in (temp, feels_like, wind, humidity))
-        
-        if has_data:
-            logger.debug(f"Valid snapshot: temp={temp}, feels={feels_like}, wind={wind}, humidity={humidity}")
-        
-        return has_data
+      if not isinstance(snap, dict):
+        return False
+      
+      current = snap.get("current") or {}
+      if not isinstance(current, dict):
+        return False
+      
+      temp = current.get("temperature_c")
+      feels_like = current.get("apparent_temperature_c")
+      wind = current.get("wind_speed_10m_ms")
+      humidity = current.get("relative_humidity_percent")
+      
+      has_data = any(v is not None for v in (temp, feels_like, wind, humidity))
+      
+      if has_data:
+        logger.debug(f"Valid snapshot: temp={temp}, feels={feels_like}, wind={wind}, humidity={humidity}")
+      
+      return has_data
     
     is_valid = False
     validation_details = ""
     
     if isinstance(snapshot, dict):
-        is_valid = is_valid_snapshot(snapshot)
-        if is_valid:
-            logger.info("Single location snapshot is valid")
-        else:
-            logger.warning("Single location snapshot is invalid or incomplete")
+      is_valid = is_valid_snapshot(snapshot)
+      if is_valid:
+        logger.info("Single location snapshot is valid.")
+      else:
+        logger.warning("Single location snapshot is invalid.")
     elif isinstance(snapshot, list):
-        if not snapshot:
-            logger.warning("Empty snapshot list")
-        else:
-            valid_snapshots = [s for s in snapshot if isinstance(s, dict) and is_valid_snapshot(s)]
-            valid_count = len(valid_snapshots)
-            total_count = len(snapshot)
-            is_valid = valid_count > 0
-            logger.info(f"{valid_count}/{total_count} snapshots valid")
+      if not snapshot:
+        logger.warning("Empty snapshot list.")
+      else:
+        valid_snapshots = [s for s in snapshot if isinstance(s, dict) and is_valid_snapshot(s)]
+        valid_count = len(valid_snapshots)
+        total_count = len(snapshot)
+        is_valid = valid_count > 0
+        logger.info(f"{valid_count}/{total_count} snapshots valid")
     else:
-        logger.error(f"Unexpected snapshot type after parsing: {type(snapshot).__name__}")
+      logger.error(f"Unexpected snapshot type: {type(snapshot).__name__}.")
     
-    observability.log_validation("EnvSnapshotValidationChecker", passed=is_valid, details=validation_details)
-    observability.log_agent_complete("EnvSnapshotValidationChecker", "env_snapshot", success=is_valid)
+    Theophrastus_Observability.log_validation("EnvSnapshotValidationChecker", passed=is_valid, details=validation_details)
+    Theophrastus_Observability.log_agent_complete("EnvSnapshotValidationChecker", "env_snapshot", success=is_valid)
     
     yield Event(author=self.name, actions=EventActions(escalate=is_valid))
 
 
 class EnvRiskValidationChecker(BaseAgent):
+  """Validates environmental risk assessment data stored in session state."""
   async def _run_async_impl(self,context: InvocationContext) -> AsyncGenerator[Event, None]:
-    observability.log_agent_start("EnvRiskValidationChecker",{"session_id": context.session.id})
+    Theophrastus_Observability.log_agent_start("EnvRiskValidationChecker",{"session_id": context.session.id})
     risk_report = context.session.state.get("env_risk_report")
     
     is_valid = False
     validation_details = ""
     
     if not risk_report:
-      logger.warning("No risk report found in state")
+      logger.warning("No risk report found in state.")
     else:
       if isinstance(risk_report, str):
         try:
           risk_report = json.loads(risk_report)
-          logger.debug("Parsed risk_report from JSON string")
+          logger.debug("Parsed risk_report from JSON string.")
         except json.JSONDecodeError as e:
-          logger.error(f"Failed to parse risk_report JSON: {e}")
-          validation_details = f"Invalid JSON: {str(e)}"
-          observability.log_validation("EnvRiskValidationChecker",passed=False,details=validation_details)
-          observability.log_agent_complete("EnvRiskValidationChecker","env_risk_report",success=False)
+          logger.error(f"Failed to parse risk_report JSON: {e}.")
+          validation_details = f"Invalid JSON: {str(e)}."
+          Theophrastus_Observability.log_validation("EnvRiskValidationChecker",passed=False,details=validation_details)
+          Theophrastus_Observability.log_agent_complete("EnvRiskValidationChecker","env_risk_report",success=False)
+
           yield Event(author=self.name, actions=EventActions(escalate=False))
           return
       
@@ -112,16 +115,17 @@ class EnvRiskValidationChecker(BaseAgent):
           logger.warning("Risk report missing or invalid overall_risk")
           validation_details = "Missing or invalid overall_risk field"
     
-    observability.log_validation("EnvRiskValidationChecker",passed=is_valid,details=validation_details)
-    observability.log_agent_complete("EnvRiskValidationChecker","env_risk_report",success=is_valid)
+    Theophrastus_Observability.log_validation("EnvRiskValidationChecker",passed=is_valid,details=validation_details)
+    Theophrastus_Observability.log_agent_complete("EnvRiskValidationChecker","env_risk_report",success=is_valid)
     
     yield Event(author=self.name, actions=EventActions())
 
 
 
 class EnvLocationGeoValidationChecker(BaseAgent):
+  """Validates and cleans geographic location data stored in session state."""
   async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
-    observability.log_agent_start("EnvLocationGeoValidationChecker", {"session_id": context.session.id})
+    Theophrastus_Observability.log_agent_start("EnvLocationGeoValidationChecker", {"session_id": context.session.id})
     
     state = context.session.state
     locations = state.get("env_location_options")
@@ -130,7 +134,7 @@ class EnvLocationGeoValidationChecker(BaseAgent):
     if not locations:
       logger.info("No location options found - passing through to allow upstream handling")
       validation_details = "No locations to validate - empty list"
-      observability.log_validation("EnvLocationGeoValidationChecker", passed=True, details=validation_details)
+      Theophrastus_Observability.log_validation("EnvLocationGeoValidationChecker", passed=True, details=validation_details)
       
       yield Event(author=self.name, actions=EventActions(escalate=True))
       return
@@ -196,15 +200,19 @@ class EnvLocationGeoValidationChecker(BaseAgent):
     
     passed = len(cleaned) > 0
 
-    observability.log_validation("EnvLocationGeoValidationChecker", passed=passed, details=validation_details)
-    observability.log_agent_complete("EnvLocationGeoValidationChecker", "env_location_options", success=passed)
+    Theophrastus_Observability.log_validation("EnvLocationGeoValidationChecker", passed=passed, details=validation_details)
+    Theophrastus_Observability.log_agent_complete("EnvLocationGeoValidationChecker", "env_location_options", success=passed)
 
     yield Event(author=self.name, actions=EventActions(escalate=passed))
 
+#Deprecated functionality, keeping for documentation and test purposes.
+#Prevented Aurora malfunction, current configuration allows it to work.
+#Future implementation as a separate sub_agent to help aurora to devilver the advice report.
 class EnvForceAuroraChecker(Agent):
+  """Enforces that the Aurora advice generation agent runs when needed."""
   def __init__(self, **args):
     if "name" in args:
-        args.pop("name")
+      args.pop("name")
 
     super().__init__(
       name="force_aurora_checker",
@@ -214,9 +222,9 @@ class EnvForceAuroraChecker(Agent):
       You are a validation checker that ENFORCES Aurora execution.
       Check the session state:
       - If env_risk_report exists but env_advice_markdown is missing or empty:
-          Return AURORA_REQUIRED
+        Return AURORA_REQUIRED
       - If advice markdown exists:
-          Return PASS
+        Return PASS
       """,
       after_agent_callback=self.enforce_aurora_callback,
       output_key="env_advice_check",**args

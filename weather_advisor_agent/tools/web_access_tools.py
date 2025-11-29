@@ -1,113 +1,19 @@
 import requests
 import time
 import logging
+
 from typing import Dict, List, Any, cast, Optional
 
-from weather_advisor_agent.utils.observability import observability
+from weather_advisor_agent.utils import Theophrastus_Observability
 
 logger = logging.getLogger(__name__)
 
-def fetch_env_snapshot_from_open_meteo(latitude: float,longitude: float) -> Dict[str, Any]:
-  """Fetches environmental snapshot from Open-Meteo API"""
-  start_time = time.time()
-  
-  observability.log_tool_call("fetch_env_snapshot_from_open_meteo", {"latitude": latitude,"longitude": longitude})
-  
-  if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
-    error = ValueError(f"Coordinates must be Num: lat={latitude}, lon={longitude}")
-    observability.log_error("fetch_env_snapshot_from_open_meteo", error)
-    raise error
-  
-  if not (-90 <= latitude <= 90):
-    error = ValueError(f"Invalid latitude: {latitude} (must be -90 to 90)")
-    observability.log_error("fetch_env_snapshot_from_open_meteo", error)
-    raise error
-  
-  if not (-180 <= longitude <= 180):
-    error = ValueError(f"Invalid longitude: {longitude} (must be -180 to 180)")
-    observability.log_error("fetch_env_snapshot_from_open_meteo", error)
-    raise error
-  
-  base_url = "https://api.open-meteo.com/v1/forecast"
-  params = {
-    "latitude": latitude,
-    "longitude": longitude,
-    "current": [
-      "temperature_2m",
-      "apparent_temperature",
-      "relative_humidity_2m",
-      "wind_speed_10m"
-    ],
-    "hourly": ["pm10", "pm2_5"],
-    "timezone": "auto"
-  }
-  
-  try:
-    logger.debug(f"Calling Open-Meteo API.\n")
-    resp = requests.get(base_url, params=params, timeout=10)
-    resp.raise_for_status()
-    data = resp.json()
-    
-    current = data.get("current", {})
-    hourly = data.get("hourly", {})
-    
-    snapshot = {
-      "location": {
-        "latitude": latitude,
-        "longitude": longitude
-      },
-      "current": {
-        "temperature_c": current.get("temperature_2m"),
-        "apparent_temperature_c": current.get("apparent_temperature"),
-        "relative_humidity_percent": current.get("relative_humidity_2m"),
-        "wind_speed_10m_ms": current.get("wind_speed_10m")
-      },
-      "hourly": {
-        "pm10": hourly.get("pm10"),
-        "pm2_5": hourly.get("pm2_5")
-      },
-      "raw": data
-    }
-
-    duration_ms = (time.time() - start_time) * 1000
-    observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=True,duration_ms=duration_ms)
-    
-    logger.info(f"Successfully fetched snapshot for ({latitude}, {longitude}). \n")
-    
-    return snapshot
-  
-  except requests.Timeout as e:
-    duration_ms = (time.time() - start_time) * 1000
-    observability.log_error("fetch_env_snapshot_from_open_meteo",e,details=f"Timeout after {duration_ms:.0f}ms")
-    observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
-    raise
-  
-  except requests.HTTPError as e:
-    duration_ms = (time.time() - start_time) * 1000
-    observability.log_error("fetch_env_snapshot_from_open_meteo",e,details=f"HTTP {resp.status_code}: {resp.text[:200]}")
-    observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
-    raise
-  
-  except requests.RequestException as e:
-    duration_ms = (time.time() - start_time) * 1000
-    observability.log_error("fetch_env_snapshot_from_open_meteo",e,details="Request failed")
-    observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
-    raise
-  
-  except Exception as e:
-    duration_ms = (time.time() - start_time) * 1000
-    observability.log_error("fetch_env_snapshot_from_open_meteo",e,details="Unexpected error during API call")
-    observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
-    raise
-
-
 def geocode_place_name(place_name: str, max_results: int = 3, region_hint: Optional[str] = None) -> Dict[str, Any]:
   """Geocodes a place name to coordinates using Open-Meteo Geocoding API"""
-  from weather_advisor_agent.utils import observability
   
   start_time = time.time()
   
-  observability.log_tool_call(
+  Theophrastus_Observability.log_tool_call(
     "geocode_place_name",{
       "place_name": place_name,
       "max_results": max_results,
@@ -235,7 +141,7 @@ def geocode_place_name(place_name: str, max_results: int = 3, region_hint: Optio
     
     if results:
       duration_ms = (time.time() - start_time) * 1000
-      observability.log_tool_complete("geocode_place_name", success=True, duration_ms=duration_ms)
+      Theophrastus_Observability.log_tool_complete("geocode_place_name", success=True, duration_ms=duration_ms)
       return {
         "query": candidate,
         "original_query": place_name,
@@ -260,6 +166,114 @@ def geocode_place_name(place_name: str, max_results: int = 3, region_hint: Optio
   else:
     logger.warning(f"No geocoding results found.\n")
   
-  observability.log_tool_complete("geocode_place_name", success=False, duration_ms=duration_ms)
+  Theophrastus_Observability.log_tool_complete("geocode_place_name", success=False, duration_ms=duration_ms)
   
   return out
+
+def fetch_env_snapshot_from_open_meteo(latitude: float,longitude: float) -> Dict[str, Any]:
+  """Fetches environmental snapshot from Open-Meteo API"""
+  start_time = time.time()
+  
+  Theophrastus_Observability.log_tool_call("fetch_env_snapshot_from_open_meteo", {"latitude": latitude,"longitude": longitude})
+  
+  if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
+    error = ValueError(f"Coordinates must be Num: lat={latitude}, lon={longitude}")
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo", error)
+    raise error
+  
+  if not (-90 <= latitude <= 90):
+    error = ValueError(f"Invalid latitude: {latitude} (must be -90 to 90)")
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo", error)
+    raise error
+  
+  if not (-180 <= longitude <= 180):
+    error = ValueError(f"Invalid longitude: {longitude} (must be -180 to 180)")
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo", error)
+    raise error
+  
+  base_url = "https://api.open-meteo.com/v1/forecast"
+  params = {
+    "latitude": latitude,
+    "longitude": longitude,
+    "current": [
+      "temperature_2m",
+      "apparent_temperature",
+      "relative_humidity_2m",
+      "wind_speed_10m"
+    ],
+    "hourly": ["pm10", "pm2_5"],
+    "timezone": "auto"
+  }
+  
+  try:
+    logger.debug(f"Calling Open-Meteo API.\n")
+    resp = requests.get(base_url, params=params, timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
+    
+    current = data.get("current", {})
+    hourly = data.get("hourly", {})
+    
+    snapshot = {
+      "location": {
+        "latitude": latitude,
+        "longitude": longitude
+      },
+      "current": {
+        "temperature_c": current.get("temperature_2m"),
+        "apparent_temperature_c": current.get("apparent_temperature"),
+        "relative_humidity_percent": current.get("relative_humidity_2m"),
+        "wind_speed_10m_ms": current.get("wind_speed_10m")
+      },
+      "hourly": {
+        "pm10": hourly.get("pm10"),
+        "pm2_5": hourly.get("pm2_5")
+      },
+      "raw": data
+    }
+
+    duration_ms = (time.time() - start_time) * 1000
+    Theophrastus_Observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=True,duration_ms=duration_ms)
+    
+    logger.info(f"Successfully fetched snapshot for ({latitude}, {longitude}). \n")
+    
+    return snapshot
+  
+  except requests.Timeout as e:
+    duration_ms = (time.time() - start_time) * 1000
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo",e,details=f"Timeout after {duration_ms:.0f}ms")
+    Theophrastus_Observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
+    raise
+  
+  except requests.HTTPError as e:
+    duration_ms = (time.time() - start_time) * 1000
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo",e,details=f"HTTP {resp.status_code}: {resp.text[:200]}")
+    Theophrastus_Observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
+    raise
+  
+  except requests.RequestException as e:
+    duration_ms = (time.time() - start_time) * 1000
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo",e,details="Request failed")
+    Theophrastus_Observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
+    raise
+  
+  except Exception as e:
+    duration_ms = (time.time() - start_time) * 1000
+    Theophrastus_Observability.log_error("fetch_env_snapshot_from_open_meteo",e,details="Unexpected error during API call")
+    Theophrastus_Observability.log_tool_complete("fetch_env_snapshot_from_open_meteo",success=False,duration_ms=duration_ms)
+    raise
+
+def fetch_and_store_snapshot(latitude: float, longitude: float) -> Dict[str, Any]:
+  """Wrapper for fetch_env_snapshot_from_open_meteo"""
+  global _last_snapshot
+  _last_snapshot = fetch_env_snapshot_from_open_meteo(latitude, longitude)
+  logger.debug(f"Stored snapshot in global cache for ({latitude}, {longitude})")
+  return _last_snapshot
+
+
+def get_last_snapshot() -> Dict[str, Any]:
+  """Retrieve last snapshot"""
+  global _last_snapshot
+  snapshot = _last_snapshot
+  _last_snapshot = None
+  return snapshot

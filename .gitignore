@@ -30,5 +30,5 @@ __pycache__/
 Thumbs.db
 
 #Diagnostic tests
-tests/test.test_evaluation.py
-tests/test.test_observability.py
+diagnostic_tests/
+versions/

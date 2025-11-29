@@ -1,7 +1,9 @@
+import re
+import json
 import logging
 from typing import Dict, Any
 
-from .web_access_tools import fetch_env_snapshot_from_open_meteo
+from weather_advisor_agent.tools.web_access_tools import fetch_env_snapshot_from_open_meteo
 
 logger = logging.getLogger(__name__)
 _last_snapshot = None
@@ -20,3 +22,20 @@ def get_last_snapshot() -> Dict[str, Any]:
   snapshot = _last_snapshot
   _last_snapshot = None
   return snapshot
+
+#Deprecated function, keeping for documentation and test purposes
+def parse_json_string(value: str) -> any:
+  """Parse JSON string, removing markdown code blocks"""
+  if not isinstance(value, str):
+    return value
+  
+  value = re.sub(r'```json\s*', '', value)
+  value = re.sub(r'```\s*', '', value)
+  value = value.strip()
+  
+  try:
+    parsed = json.loads(value)
+    return parsed
+  except json.JSONDecodeError as e:
+    logger.debug(f"JSON parse failed: {e}.\n")
+    return value
