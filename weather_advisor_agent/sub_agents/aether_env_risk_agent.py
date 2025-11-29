@@ -1,13 +1,61 @@
-from weather_advisor_agent.config import config
+import json
+import logging
 
 from google.adk.agents import Agent, LoopAgent
 
-from weather_advisor_agent.validation_checkers import EnvRiskValidationChecker,EnvForceAuroraChecker
+from weather_advisor_agent.config import config
 
-from weather_advisor_agent.sub_agents.aurora_env_advice_writer import make_aurora_writer
+from weather_advisor_agent.utils import Theophrastus_Observability, session_cache
 
-from weather_advisor_agent.utils import aether_risk_callback, observability
+from weather_advisor_agent.validation_checkers import EnvRiskValidationChecker
 
+from weather_advisor_agent.sub_agents.aurora_env_advice_writer import aurora_env_advice_writer
+
+logger = logging.getLogger(__name__)
+
+def aether_risk_callback(*args, **kwargs):
+  """Callback for aether risk agent - stores risk assessment"""
+  ctx = kwargs.get("callback_context")
+  if ctx is None and len(args) >= 2:
+    ctx = args[1]
+  if ctx is None:
+    return None
+  
+  state = ctx.session.state
+  risk_report = state.get("env_risk_report")
+  
+  if isinstance(risk_report, str):
+    logger.warning("Aether returned string instead of dict.")
+    
+    risk_str = risk_report.strip()
+    if risk_str.startswith("```json"):
+      risk_str = risk_str[7:]
+    elif risk_str.startswith("```"):
+      risk_str = risk_str[3:]
+    if risk_str.endswith("```"):
+      risk_str = risk_str[:-3]
+    risk_str = risk_str.strip()
+    
+    try:
+      risk_report = json.loads(risk_str)
+      logger.info("Parsed JSON string.")
+    except json.JSONDecodeError as e:
+      logger.error(f"Could not parse risk report JSON")
+      return None
+  
+  if isinstance(risk_report, dict):
+    state["env_risk_report"] = risk_report
+    session_cache.store_evaluation_data(ctx.session.id, {"env_risk_report": risk_report})
+    
+    Theophrastus_Observability.log_agent_complete("aether_env_risk_agent", "env_risk_report", success=True)
+    logger.info("Risk assessment completed.")
+
+    return None
+  else:
+    logger.warning("No risk report or invalid format.")
+    Theophrastus_Observability.log_agent_complete("aether_env_risk_agent", "env_risk_report", success=False)
+    
+    return None
 
 aether_env_risk_agent = Agent(
   model=config.critic_model,
@@ -64,8 +112,11 @@ aether_env_risk_agent = Agent(
 
 robust_env_risk_agent = LoopAgent(
   name="robust_env_risk_agent",
-  description="A robust risk analyst that retries if no valid risk report is produced.",
-  sub_agents=[aether_env_risk_agent,make_aurora_writer(name="aurora_writer_for_risk_pipeline"),EnvRiskValidationChecker(name="env_risk_validation_checker"),  EnvForceAuroraChecker()],
-  max_iterations=2
+  description="Risk analysis pipeline that automatically generates advice",
+  sub_agents=[
+    aether_env_risk_agent,
+    EnvRiskValidationChecker(name="env_risk_validation_checker"),
+    aurora_env_advice_writer
+  ],
+  max_iterations=1
 )
-

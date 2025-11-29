@@ -1,5 +1,6 @@
 import json
 import logging
+
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List, Optional
@@ -266,4 +267,4 @@ class TheophrastusMemoryBank:
       ]
     }
 
-TheophrastusMemory = TheophrastusMemoryBank(storage_path="data/weather_advisor_agent/Theophrastus_memory.json")
+TheophrastusMemory = TheophrastusMemoryBank(storage_path="data/theo_memory.json")

@@ -2,8 +2,9 @@ import logging
 import time
 import json
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from pathlib import Path
 
+from typing import Dict, Any, Optional, List
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
@@ -122,20 +123,21 @@ class TheophrastusMetrics:
     print(f" -Success Rate: {summary['success_rate_percent']}%")
     print(f" -Failed Operations: {summary['failed_operations']}")
     
+    print("\n" + "="*80)
     if summary['agent_call_breakdown']:
-      print("\nAgent Calls:")
+      print("\n -Agent Calls:")
       for agent, count in sorted(summary['agent_call_breakdown'].items()):
-        print(f"{agent}: {count}")
+        print(f"  *{agent}: {count}")
   
     if summary['tool_call_breakdown']:
-      print("\nTool Calls:")
+      print("\n -Tool Calls:")
       for tool, count in sorted(summary['tool_call_breakdown'].items()):
-        print(f"{tool}: {count}")
+        print(f"  *{tool}: {count}")
     
     if summary['error_breakdown']:
-      print("\nErrors:")
+      print("\n -Errors:")
       for error, count in sorted(summary['error_breakdown'].items()):
-        print(f"{error}: {count}")
+        print(f"  *{error}: {count}")
 
 class TheophrastusObservability:   
     def __init__(self, enable_traces: bool = True):
@@ -251,9 +253,16 @@ class TheophrastusObservability:
         "traces": [t.to_dict() for t in self.traces[-10:]]
       }
     
-    def export_traces(self, filepath: str):
+    def export_traces(self, filename: str):
+      """Export traces to JSON file"""
       trace_data = {"summary": self.get_trace_summary(),"all_traces": [t.to_dict() for t in self.traces]}
-      with open(filepath, 'w') as f:
+      
+      base_dir = Path("weather_advisor_agent") / "data"
+      file = f"{filename}_traces.json"
+      full_path = base_dir / file
+      full_path.parent.mkdir(parents=True, exist_ok=True)
+
+      with open(full_path, 'w') as f:
         json.dump(trace_data, f, indent=2)
 
     def get_metrics_summary(self) -> Dict[str, Any]:
@@ -264,20 +273,25 @@ class TheophrastusObservability:
       """Print formatted metrics summary"""
       self.metrics.print_summary()
     
-    def export_metrics(self, filepath: str):
+    def export_metrics(self, filename: str):
       """Export metrics to JSON file"""
-      import json
-      with open(filepath, 'w') as f:
+      base_dir = Path("weather_advisor_agent") / "data"
+      file = f"{filename}_metrics.json"
+      full_path = base_dir / file
+      full_path.parent.mkdir(parents=True, exist_ok=True)
+
+      with open(full_path, 'w') as f:
         json.dump(self.metrics.get_summary(), f, indent=2)
         
 
-observability = TheophrastusObservability(enable_traces=True)
+Theophrastus_Observability = TheophrastusObservability(enable_traces=True)
 
+#Decorators
 def trace_function(operation_name: Optional[str] = None):
   def decorator(func):
     def wrapper(*args, **kwargs):
       name = operation_name or func.__name__
-      with observability.trace_operation(name):
+      with Theophrastus_Observability.trace_operation(name):
         return func(*args, **kwargs)
     return wrapper
   return decorator
@@ -288,7 +302,7 @@ def log_exceptions(context: str):
       try:
         return func(*args, **kwargs)
       except Exception as e:
-        observability.log_error(context, e, details=f"Function: {func.__name__} | \n")
+        Theophrastus_Observability.log_error(context, e, details=f"Function: {func.__name__} | \n")
         raise
     return wrapper
   return decorator

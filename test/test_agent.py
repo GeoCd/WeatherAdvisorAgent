@@ -1,13 +1,12 @@
 import asyncio
 import logging
-from pathlib import Path
 
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
 
 from weather_advisor_agent import Theophrastus_root_agent
-from weather_advisor_agent.utils import observability
+from weather_advisor_agent.utils import Theophrastus_Observability
 
 APP_NAME = "Theophrastus_app"
 USER_ID = "test_user"
@@ -40,21 +39,26 @@ async def main():
   )
 
   queries = [
-    "How is the weather in my city Sacramento, California?",
-    "I want to go hiking this weekend near Mexico City. What are some good locations?",
+    "How is the weather in my city Nezahualcoyotl, Mexico State?",
+    "I want to see the snow this weekend near Madrid. What are some good locations?",
     "What is the weather like in those locations?",
     "Generate a recommendations report.",
-    "Save it to reports/weather_advisor_agent/Theophrastus_recomendations.md"
+    "Save it as 'Madrid'"
   ]
 
   logging.getLogger("google_genai.types").setLevel(logging.ERROR)
 
+  print("="*80)
+  print("THEOPHRASTUS AGENT TEST WITH OBSERVABILITY, LOGGING & MEMORY")
+  print("="*80)
+
   for i, query in enumerate(queries, 1):
-    print("=== USER INPUT ===")
-    print(f"\n>>> {query}\n")
+    print(f"{'='*80}")
+    print(f"\n>>> USER: {query}\n")
+    print(f"{'='*80}")
     last_user_facing_text = None
 
-    with observability.trace_operation(f"user_query_{i}",attributes={"query": query[:50]}):
+    with Theophrastus_Observability.trace_operation(f"user_query_{i}",attributes={"query": query[:50]}):
       async for event in runner.run_async(
         user_id=USER_ID,
         session_id=SESSION_ID,
@@ -77,20 +81,22 @@ async def main():
 
           last_user_facing_text = text
 
-    print("=== Theophrastus RESPONSE ===")
+    print(f"\n{"="*80}\n")
     if last_user_facing_text:
-        print(f"{last_user_facing_text}\n")
+        print(f">>> THEOPHRASTUS: {last_user_facing_text}")
     else:
-      print("[No user-facing text in response]\n")
+      print(">>> THEOPHRASTUS: [No user-facing text in response]\n")
+    print(f"\n{"="*80}\n")
 
-  print("METRICS & TRACES:")
-  observability.print_metrics_summary()
+  Theophrastus_Observability.print_metrics_summary()
 
-  metrics_file = Path("weather_advisor_agent/data/observability_metrics_test.json")
-  observability.export_metrics(str(metrics_file))
+  Theophrastus_Observability.export_metrics("test")
 
-  traces_file = Path("weather_advisor_agent/data/observability_traces_test.json")
-  observability.export_traces(str(traces_file))
+  Theophrastus_Observability.export_traces("test")
+
+  print("\n" + "="*80)
+  print("TEST RUN COMPLETE")
+  print("="*80)
 
 if __name__ == "__main__":
     asyncio.run(main())

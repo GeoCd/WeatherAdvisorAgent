@@ -1,48 +1,35 @@
-import json
 import logging
 
 from weather_advisor_agent.config import config
 
 from google.adk.agents import Agent
-
-from weather_advisor_agent.utils import observability
-
-from weather_advisor_agent.utils import session_cache
-
 from google.genai.types import Content, Part
 from google.adk.agents.callback_context import CallbackContext
 
+from weather_advisor_agent.utils import Theophrastus_Observability, session_cache
+
 logger = logging.getLogger(__name__)
 
-# Replace your existing aurora callback function:
-def aurora_callback_from_global(callback_context: CallbackContext) -> Content:
-  """
-  Callback for aurora advice writer - stores final markdown report
-  """
-  advice = callback_context.session.state.get("env_advice_markdown")
-  
-  if advice:
-      # Already in state, also store in global cache
-      session_cache.store_evaluation_data(
-          callback_context.session.id,
-          {"env_advice_markdown": advice}
-      )
-      
-      observability.log_agent_complete("aurora_env_advice_writer", "env_advice_markdown", success=True)
-      logger.info("Advice report generated.")
-      
-      # Return the advice as content to display to user
-      return Content(parts=[Part(text=advice)])
-  else:
-      logger.warning("No advice markdown generated.")
-      observability.log_agent_complete("aurora_env_advice_writer", "env_advice_markdown", success=False)
-      return Content(parts=[Part(text="Unable to generate recommendations.")])
+def aurora_advice_callback(callback_context: CallbackContext) -> Content:
+  """Callback for aurora advice writer"""
+  raw_output = callback_context.state.get("env_advice_markdown")
+
+  if raw_output:
+    text = raw_output.strip()
+    callback_context.session.state["env_advice_markdown"] = text
+    session_cache.store_evaluation_data(callback_context.session.id, {"env_advice_markdown": text})
+
+    Theophrastus_Observability.log_agent_complete("aurora_env_advice_writer", "env_advice_markdown", success=True)
+
+    return Content(parts=[Part(text=text)])
+
+  Theophrastus_Observability.log_agent_complete("aurora_env_advice_writer", "env_advice_markdown", success=False)
+  return Content(parts=[Part(text="Unable to generate recommendations.")])
 
 
-def make_aurora_writer(name="aurora_env_advice_writer"):
-  return Agent(
+aurora_env_advice_writer = Agent(
   model=config.writer_model,
-  name=name,
+  name="aurora_env_advice_writer",
   description="Writes user-facing environmental advice based on data and risk report.",
   instruction="""
   CRITICAL ROLE BOUNDARY
@@ -303,5 +290,6 @@ def make_aurora_writer(name="aurora_env_advice_writer"):
   - Never output raw JSON or state variables
   - Never wrap output in code blocks.
   """,
-  output_key="env_advice_markdown"
+  output_key="env_advice_markdown",
+  after_agent_callback=aurora_advice_callback
 )

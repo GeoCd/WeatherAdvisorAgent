@@ -1,18 +1,65 @@
+import json
+import logging
+
+from google.adk.agents import Agent, LoopAgent
+from google.genai.types import Content, Part
+from google.adk.tools import FunctionTool, google_search
+from google.adk.agents.callback_context import CallbackContext
+
 from weather_advisor_agent.config import config
-
-from google.adk.agents import LoopAgent
-from google.adk.agents import Agent
-
-from google.adk.tools import FunctionTool
-from google.adk.tools import google_search
-
-from weather_advisor_agent.validation_checkers import EnvLocationGeoValidationChecker
-
-from weather_advisor_agent.utils import atlas_location_callback
 
 from weather_advisor_agent.tools import geocode_place_name
 
-from weather_advisor_agent.utils import observability
+from weather_advisor_agent.utils import Theophrastus_Observability, session_cache
+
+from weather_advisor_agent.validation_checkers import EnvLocationGeoValidationChecker
+
+logger = logging.getLogger(__name__)
+
+def atlas_location_callback(*args, **kwargs):
+  """Callback for atlas location agent - stores location options"""
+  ctx = kwargs.get("callback_context")
+  if ctx is None and len(args) >= 2:
+    ctx = args[1]
+  if ctx is None:
+    return None
+  
+  state = ctx.session.state
+  locations = state.get("env_location_options")
+  
+  if isinstance(locations, str):
+    logger.warning("Atlas returned string instead of list.")
+    
+    locations_str = locations.strip()
+    if locations_str.startswith("```json"):
+      locations_str = locations_str[7:]  # Remove ```json
+    elif locations_str.startswith("```"):
+      locations_str = locations_str[3:]   # Remove ```
+    if locations_str.endswith("```"):
+      locations_str = locations_str[:-3]  # Remove trailing ```
+    locations_str = locations_str.strip()
+    
+    try:
+      locations = json.loads(locations_str)
+      logger.info("Successfully parsed locations from JSON string.")
+    except json.JSONDecodeError as e:
+      logger.error(f"Could not parse locations: {e}")
+      return None
+  
+  if isinstance(locations, list) and locations:
+    # FIX: Store as list, NOT as JSON string
+    state["env_location_options"] = locations
+    session_cache.store_evaluation_data(ctx.session.id,{"env_location_options": locations})
+    
+    Theophrastus_Observability.log_agent_complete("atlas_env_location_agent", "env_location_options", success=True)
+    logger.info(f"Found {len(locations)} location option(s).")
+
+    return None
+  else:
+    logger.warning("No location options or invalid format.")
+    Theophrastus_Observability.log_agent_complete("atlas_env_location_agent", "env_location_options", success=False)
+    
+    return None
 
 atlas_env_location_geocode_agent = Agent(
   model=config.mapper_model,
@@ -97,7 +144,7 @@ atlas_env_location_discovery_agent = Agent(
   "running trails near Tokyo mountains forest"
 
   PRODUCTION RULES:
-  1. From the google_search results, extract 3–7 REAL locations.
+  1. From the google_search results, extract 3-7 REAL locations.
   2. For each location, produce:
     {
       "name": "Location Name",
