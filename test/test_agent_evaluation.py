@@ -52,7 +52,7 @@ async def main():
 
   test_cases = [
     {
-      "query": "I love hiking and camping. Can you remember that for me?",
+      "query": "I love swimming and camping. Can you remember that for me?",
       "complexity": "simple",
       "description": "Store user preferences - should call store_user_preference"
     },
@@ -62,12 +62,12 @@ async def main():
       "description": "Recall preferences - should call get_user_preferences"
     },
     {
-      "query": "How is the weather in my city Nezahualcoyotl, Mexico State?",
+      "query": "How is the weather in my city Guadalajara, Jalisco?",
       "complexity": "simple",
       "description": "Simple weather query for known location"
     },
     {
-      "query": "I want to go hiking this weekend near Madrid. What are some good locations?",
+      "query": "I want to go see the auroras borealis this weekend near Stockholm. What are some good locations?",
       "complexity": "medium",
       "description": "Location search with activity context"
     },
@@ -216,7 +216,6 @@ async def main():
     session_id=SESSION_ID
   )
   
-  # Show user-scoped memory (persists across sessions with user: prefix)
   print("User Memory (would persist with DatabaseSessionService):")
   user_memory = {k: v for k, v in final_session.state.items() if k.startswith("user:")}
   if user_memory:
@@ -227,14 +226,13 @@ async def main():
           print(f"    {sub_key}: {str(sub_value)[:100]}...")
       elif isinstance(value, list):
         print(f"    {len(value)} items")
-        for idx, item in enumerate(value[:3]):  # Show first 3
+        for idx, item in enumerate(value[:3]):
           print(f"      [{idx}]: {str(item)[:80]}...")
       else:
         print(f"    {str(value)[:100]}...")
   else:
     print("  (No user memory stored - memory tools were not called)")
   
-  # Show all state keys for debugging
   print("\n" + "="*80)
   print("All Session State Keys:")
   print("="*80)

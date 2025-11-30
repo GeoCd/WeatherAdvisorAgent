@@ -3,30 +3,30 @@
     "total_traces": 6,
     "successful": 6,
     "failed": 0,
-    "avg_duration_ms": 13287.469585736593,
-    "max_duration_ms": 31695.133686065674,
-    "min_duration_ms": 1896.695852279663,
+    "avg_duration_ms": 11803.36606502533,
+    "max_duration_ms": 21473.984718322754,
+    "min_duration_ms": 1560.715913772583,
     "traces": [
       {
-        "span_id": "test_case_1_1764527874017",
+        "span_id": "test_case_1_1764544650551",
         "name": "test_case_1",
-        "start_time": 1764527874.017013,
-        "end_time": 1764527878.443952,
-        "duration_ms": 4426.939010620117,
+        "start_time": 1764544650.551717,
+        "end_time": 1764544655.1911025,
+        "duration_ms": 4639.385461807251,
         "status": "success",
         "attributes": {
-          "query": "I love hiking and camping. Can you remember that f",
+          "query": "I love swimming and camping. Can you remember that",
           "complexity": "simple",
           "description": "Store user preferences - should call store_user_preference"
         },
         "parent_span_id": null
       },
       {
-        "span_id": "test_case_2_1764527879464",
+        "span_id": "test_case_2_1764544656201",
         "name": "test_case_2",
-        "start_time": 1764527879.4648223,
-        "end_time": 1764527881.3615181,
-        "duration_ms": 1896.695852279663,
+        "start_time": 1764544656.2016902,
+        "end_time": 1764544657.762406,
+        "duration_ms": 1560.715913772583,
         "status": "success",
         "attributes": {
           "query": "What outdoor activities do I enjoy?",
@@ -36,39 +36,39 @@
         "parent_span_id": null
       },
       {
-        "span_id": "test_case_3_1764527882379",
+        "span_id": "test_case_3_1764544658797",
         "name": "test_case_3",
-        "start_time": 1764527882.37943,
-        "end_time": 1764527897.0038807,
-        "duration_ms": 14624.45068359375,
+        "start_time": 1764544658.7970319,
+        "end_time": 1764544673.6235054,
+        "duration_ms": 14826.473474502563,
         "status": "success",
         "attributes": {
-          "query": "How is the weather in my city Nezahualcoyotl, Mexi",
+          "query": "How is the weather in my city Guadalajara, Jalisco",
           "complexity": "simple",
           "description": "Simple weather query for known location"
         },
         "parent_span_id": null
       },
       {
-        "span_id": "test_case_4_1764527898034",
+        "span_id": "test_case_4_1764544674642",
         "name": "test_case_4",
-        "start_time": 1764527898.034452,
-        "end_time": 1764527907.5357006,
-        "duration_ms": 9501.248598098755,
+        "start_time": 1764544674.6428027,
+        "end_time": 1764544685.8696587,
+        "duration_ms": 11226.855993270874,
         "status": "success",
         "attributes": {
-          "query": "I want to go hiking this weekend near Madrid. What",
+          "query": "I want to go see the auroras borealis this weekend",
           "complexity": "medium",
           "description": "Location search with activity context"
         },
         "parent_span_id": null
       },
       {
-        "span_id": "test_case_5_1764527908562",
+        "span_id": "test_case_5_1764544686906",
         "name": "test_case_5",
-        "start_time": 1764527908.5627935,
-        "end_time": 1764527926.1431432,
-        "duration_ms": 17580.349683761597,
+        "start_time": 1764544686.906463,
+        "end_time": 1764544703.9992437,
+        "duration_ms": 17092.780828475952,
         "status": "success",
         "attributes": {
           "query": "What is the weather like in those locations?",
@@ -78,11 +78,11 @@
         "parent_span_id": null
       },
       {
-        "span_id": "test_case_6_1764527927170",
+        "span_id": "test_case_6_1764544705029",
         "name": "test_case_6",
-        "start_time": 1764527927.1709268,
-        "end_time": 1764527958.8660605,
-        "duration_ms": 31695.133686065674,
+        "start_time": 1764544705.0291843,
+        "end_time": 1764544726.503169,
+        "duration_ms": 21473.984718322754,
         "status": "success",
         "attributes": {
           "query": "Generate a recommendations report.",
@@ -95,25 +95,25 @@
   },
   "all_traces": [
     {
-      "span_id": "test_case_1_1764527874017",
+      "span_id": "test_case_1_1764544650551",
       "name": "test_case_1",
-      "start_time": 1764527874.017013,
-      "end_time": 1764527878.443952,
-      "duration_ms": 4426.939010620117,
+      "start_time": 1764544650.551717,
+      "end_time": 1764544655.1911025,
+      "duration_ms": 4639.385461807251,
       "status": "success",
       "attributes": {
-        "query": "I love hiking and camping. Can you remember that f",
+        "query": "I love swimming and camping. Can you remember that",
         "complexity": "simple",
         "description": "Store user preferences - should call store_user_preference"
       },
       "parent_span_id": null
     },
     {
-      "span_id": "test_case_2_1764527879464",
+      "span_id": "test_case_2_1764544656201",
       "name": "test_case_2",
-      "start_time": 1764527879.4648223,
-      "end_time": 1764527881.3615181,
-      "duration_ms": 1896.695852279663,
+      "start_time": 1764544656.2016902,
+      "end_time": 1764544657.762406,
+      "duration_ms": 1560.715913772583,
       "status": "success",
       "attributes": {
         "query": "What outdoor activities do I enjoy?",
@@ -123,39 +123,39 @@
       "parent_span_id": null
     },
     {
-      "span_id": "test_case_3_1764527882379",
+      "span_id": "test_case_3_1764544658797",
       "name": "test_case_3",
-      "start_time": 1764527882.37943,
-      "end_time": 1764527897.0038807,
-      "duration_ms": 14624.45068359375,
+      "start_time": 1764544658.7970319,
+      "end_time": 1764544673.6235054,
+      "duration_ms": 14826.473474502563,
       "status": "success",
       "attributes": {
-        "query": "How is the weather in my city Nezahualcoyotl, Mexi",
+        "query": "How is the weather in my city Guadalajara, Jalisco",
         "complexity": "simple",
         "description": "Simple weather query for known location"
       },
       "parent_span_id": null
     },
     {
-      "span_id": "test_case_4_1764527898034",
+      "span_id": "test_case_4_1764544674642",
       "name": "test_case_4",
-      "start_time": 1764527898.034452,
-      "end_time": 1764527907.5357006,
-      "duration_ms": 9501.248598098755,
+      "start_time": 1764544674.6428027,
+      "end_time": 1764544685.8696587,
+      "duration_ms": 11226.855993270874,
       "status": "success",
       "attributes": {
-        "query": "I want to go hiking this weekend near Madrid. What",
+        "query": "I want to go see the auroras borealis this weekend",
         "complexity": "medium",
         "description": "Location search with activity context"
       },
       "parent_span_id": null
     },
     {
-      "span_id": "test_case_5_1764527908562",
+      "span_id": "test_case_5_1764544686906",
       "name": "test_case_5",
-      "start_time": 1764527908.5627935,
-      "end_time": 1764527926.1431432,
-      "duration_ms": 17580.349683761597,
+      "start_time": 1764544686.906463,
+      "end_time": 1764544703.9992437,
+      "duration_ms": 17092.780828475952,
       "status": "success",
       "attributes": {
         "query": "What is the weather like in those locations?",
@@ -165,11 +165,11 @@
       "parent_span_id": null
     },
     {
-      "span_id": "test_case_6_1764527927170",
+      "span_id": "test_case_6_1764544705029",
       "name": "test_case_6",
-      "start_time": 1764527927.1709268,
-      "end_time": 1764527958.8660605,
-      "duration_ms": 31695.133686065674,
+      "start_time": 1764544705.0291843,
+      "end_time": 1764544726.503169,
+      "duration_ms": 21473.984718322754,
       "status": "success",
       "attributes": {
         "query": "Generate a recommendations report.",

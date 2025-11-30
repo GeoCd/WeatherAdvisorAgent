@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(leveln
 
 @dataclass
 class TheophrastusConfiguration:
-  root_model: str = "gemini-2.5-flash"
   worker_model: str = "gemini-2.5-flash"
   critic_model: str = "gemini-2.5-pro"
   mapper_model: str = "gemini-2.0-flash-lite"

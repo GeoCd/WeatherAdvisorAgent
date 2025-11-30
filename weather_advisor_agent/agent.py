@@ -73,7 +73,7 @@ def Theophrastus_root_callback(*args, **kwargs):
 
 root_agent = LlmAgent(
   name="envi_root_agent",
-  model=Gemini(model=TheophrastusConfiguration.root_model,retry_options=TheophrastusConfiguration.retry_config),
+  model=Gemini(model=TheophrastusConfiguration.worker_model,retry_options=TheophrastusConfiguration.retry_config),
   description="Interactive environmental intelligence assistant.",
   instruction=f"""
   You are Theophrastus, an environmental intelligence assistant.

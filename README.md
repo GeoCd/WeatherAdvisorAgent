@@ -97,6 +97,8 @@ Enviro_agent/
 
 ### The Sub-Agents
 
+![Architecture](./SubAgents_thumbnail.png "Theophrastus_thumbnail")
+
 #### Zephyr (Data Agent)
 - Fetches weather data from Open-Meteo API.
 - Processes current conditions and forecasts.
@@ -268,7 +270,7 @@ Then navigate to `http://localhost:8000` in your favorite web browser.
 
 - Option 2: Python Script
 ```powershell
-python -m test.test_agent
+python -m test.test_agent_evaluation
 ```
 
 ### Usage Example
@@ -304,7 +306,6 @@ EVALUATION_ENABLED=true
 
 Edit `config.py` to customize models based on your needs!
 ```python
-root_model = "gemini-2.5-flash"
 worker_model = "gemini-2.5-flash"
 risk_model = "gemini-2.5-pro"
 mapper_model = "gemini-2.0-flash-lite"
