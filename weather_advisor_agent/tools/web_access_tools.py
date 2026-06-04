@@ -8,6 +8,8 @@ from weather_advisor_agent.utils import Theophrastus_Observability
 
 logger = logging.getLogger(__name__)
 
+_last_snapshot = None
+
 def geocode_place_name(place_name: str, max_results: int = 3, region_hint: Optional[str] = None) -> Dict[str, Any]:
   """Geocodes a place name to coordinates using Open-Meteo Geocoding API"""
   
