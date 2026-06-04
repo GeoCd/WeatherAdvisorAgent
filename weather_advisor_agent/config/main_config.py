@@ -9,8 +9,6 @@ def _configure_env() -> None:
   load_dotenv()
   os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "FALSE"
 
-_configure_env()
-
 logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 @dataclass
